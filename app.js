@@ -112,15 +112,19 @@ app.get('/register', function(req, res){
     res.render('register');
 });
 app.get('/secrets', function(req, res){
-    if(req.isAuthenticated()){
-        res.render('submit');
+  User.find({"secret": {$ne:null}}, function(err, foundUsers){
+    if(err){
+      console.log(err);
     }else{
-        res.redirect('/login');
+      if(foundUsers){
+        res.render('secrets', {usersWithSecrets: foundUsers})
+      }
     }
+  })
 });
 app.get('/submit', function(req, res){
     if(req.isAuthenticated()){
-        res.render('secrets');
+        res.render('submit');
     }else{
         res.redirect('/login');
     }
@@ -162,8 +166,10 @@ app.post('/login', function(req, res){
 app.post('/submit', function(req, res){
     const submittedSecret = req.body.secret;
     
-    User.findById(req.user.id, function(err, foundUser){
-      if(!err){
+    const searchedId = req.user.id;
+   
+    User.findById(searchedId, function(err, foundUser){
+      if(err){
         console.log(err);
       }else{
         if(foundUser){
@@ -174,7 +180,7 @@ app.post('/submit', function(req, res){
         }
       }
     })
-})
+});
 app.listen(3000, function(){
     console.log("server is running");
 });
